@@ -5,7 +5,7 @@ from openai import OpenAI
 openai_api_key = st.secrets.get("API_KEY")  # change to "OPEN_API_KEY" if that's your key name
 
 if not openai_api_key:
-    st.error("Missing OPENAI_API_KEY in Streamlit secrets. Add it to .streamlit/secrets.toml.")
+    st.error("Missing API_KEY in Streamlit secrets. Add it to .streamlit/secrets.toml.")
     st.stop()
 
 client = OpenAI(api_key=openai_api_key)
