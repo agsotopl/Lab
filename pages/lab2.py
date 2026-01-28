@@ -41,17 +41,17 @@ else:
 if summary_choice == "100 words":
     format_instruction = (
         "Summarize the document in exactly 100 words. "
-        "No title. No bullet points. Plain text only."
+        "No heading or bullet points, only plain text."
     )
 elif summary_choice == "2 connecting paragraphs":
     format_instruction = (
         "Summarize the document in exactly two connected paragraphs. "
-        "No bullet points. No headings."
+        "No bullet points or headings."
     )
 else:  # "5 bullet points"
     format_instruction = (
         "Summarize the document in exactly 5 bullet points. "
-        "Each bullet must be one complete sentence."
+        "Each bullet must be a complete sentence."
     )
 
 # --- File upload + action ---
