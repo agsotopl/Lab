@@ -27,6 +27,16 @@ summary_choice = st.sidebar.radio(
     index=0,
 )
 
+# --- Sidebar model options ---
+st.sidebar.header("Model Settings")
+
+use_advanced = st.sidebar.checkbox("Use advanced model")
+
+if use_advanced:
+    model = "gpt-5"
+else:
+    model = "gpt-5-mini"
+
 # Build an instruction based on sidebar choice
 if summary_choice == "100 words":
     format_instruction = (
@@ -64,7 +74,7 @@ if uploaded_file and generate:
     ]
 
     stream = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model=model,
         messages=messages,
         stream=True,
     )
