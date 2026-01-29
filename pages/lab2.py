@@ -40,18 +40,18 @@ else:
 # Sidebar instructions
 if summary_choice == "100 words":
     format_instruction = (
-        "Summarize the document in exactly 100 words. "
+        "Summarize the document in 100 words. "
         "No heading or bullet points, only plain text."
     )
 elif summary_choice == "2 connecting paragraphs":
     format_instruction = (
-        "Summarize the document in exactly two connected paragraphs. "
+        "Summarize the document in two paragraphs. "
         "No bullet points or headings."
     )
 else: 
     format_instruction = (
-        "Summarize the document in exactly 5 bullet points. "
-        "Each bullet must be a complete sentence."
+        "Summarize the document in 5 bullet points. "
+        "Each should be relatively short and concise."
     )
 
 # File upload 
