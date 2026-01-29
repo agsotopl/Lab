@@ -1,8 +1,8 @@
 import streamlit as st
 from openai import OpenAI
 
-# --- Load API key from Streamlit secrets (NO user input) ---
-openai_api_key = st.secrets.get("API_KEY")  # change to "OPEN_API_KEY" if that's your key name
+# Load API key 
+openai_api_key = st.secrets.get("API_KEY")  
 
 if not openai_api_key:
     st.error("Missing API_KEY in Streamlit secrets. Add it to .streamlit/secrets.toml.")
@@ -10,11 +10,11 @@ if not openai_api_key:
 
 client = OpenAI(api_key=openai_api_key)
 
-# --- Page header ---
+# Page header
 st.title("Lab 2")
 st.write("Upload a document and choose a summary style from the sidebar.")
 
-# --- Sidebar summary options ---
+# Summary options
 st.sidebar.header("Summary Style")
 
 summary_choice = st.sidebar.radio(
@@ -27,7 +27,7 @@ summary_choice = st.sidebar.radio(
     index=0,
 )
 
-# --- Sidebar model options ---
+# Sidebar build
 st.sidebar.header("Model Settings")
 
 use_advanced = st.sidebar.checkbox("Use advanced model")
@@ -37,7 +37,7 @@ if use_advanced:
 else:
     model = "gpt-5-mini"
 
-# Build an instruction based on sidebar choice
+# Sidebar instructions
 if summary_choice == "100 words":
     format_instruction = (
         "Summarize the document in exactly 100 words. "
@@ -48,13 +48,13 @@ elif summary_choice == "2 connecting paragraphs":
         "Summarize the document in exactly two connected paragraphs. "
         "No bullet points or headings."
     )
-else:  # "5 bullet points"
+else: 
     format_instruction = (
         "Summarize the document in exactly 5 bullet points. "
         "Each bullet must be a complete sentence."
     )
 
-# --- File upload + action ---
+# File upload 
 uploaded_file = st.file_uploader("Upload a document (.txt or .md)", type=("txt", "md"))
 
 generate = st.button("Generate Summary", disabled=not uploaded_file)
