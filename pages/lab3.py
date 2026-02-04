@@ -23,12 +23,53 @@ if 'client' not in st.session_state:
 
 if 'messages' not in st.session_state:
     st.session_state["messages"] = [
-        {"role": "assistant", "content": "How can I help?"}]
+        {
+            "role": "system",
+            "content": "You are a helpful assistant who explains things in a way that a 10-year-old can understand. Use simple words, short sentences, and fun examples. After answering a question, always ask 'Do you want more info?' If the user says yes, provide more details and ask again. If the user says no, go back to asking 'How can I help?'"
+        }
+    ]
+
+def maintain_buffer(messages, max_user_messages=2):
+    """Keep the system prompt and only the last N user messages and their corresponding assistant responses."""
+    # Find and preserve the system message
+    system_message = None
+    non_system_messages = []
+    
+    for msg in messages:
+        if msg["role"] == "system":
+            system_message = msg
+        else:
+            non_system_messages.append(msg)
+    
+    if len(non_system_messages) <= 1:
+        return messages
+    
+    # Find all user messages and their indices in non-system messages
+    user_indices = [i for i, msg in enumerate(non_system_messages) if msg["role"] == "user"]
+    
+    if len(user_indices) <= max_user_messages:
+        return messages
+    
+    # Keep only the last max_user_messages user messages
+    indices_to_keep = set(user_indices[-max_user_messages:])
+    
+    # For each user message to keep, also keep the assistant response that follows
+    for idx in list(indices_to_keep):
+        if idx + 1 < len(non_system_messages) and non_system_messages[idx + 1]["role"] == "assistant":
+            indices_to_keep.add(idx + 1)
+    
+    # Rebuild the messages list
+    filtered = [non_system_messages[i] for i in range(len(non_system_messages)) if i in indices_to_keep]
+    
+    # Prepend system message if it exists
+    if system_message:
+        return [system_message] + filtered
+    return filtered
 
 for msg in st.session_state.messages:
-    st.chat_message(msg["role"]).write(msg["content"])
-    with st.chat_message(msg["role"]):
-        st.write(msg["content"])
+    # Don't display system messages
+    if msg["role"] == "system":
+        continue
     chat_role = st.chat_message(msg["role"])
     chat_role.write(msg["content"])
 
@@ -47,4 +88,9 @@ if prompt := st.chat_input("What's up?"):
 
     st.session_state.messages.append({"role": "assistant", "content": response})
     
+    # Maintain buffer: keep only the last 2 user messages and their responses, and preserve system prompt
+    st.session_state.messages = maintain_buffer(st.session_state.messages)
+    
+    # Rerun to show the latest response
+    st.rerun()
 
