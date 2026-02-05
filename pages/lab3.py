@@ -26,6 +26,10 @@ if 'messages' not in st.session_state:
         {
             "role": "system",
             "content": "You are a helpful assistant who explains things in a way that a 10-year-old can understand. Use simple words, short sentences, and fun examples. After answering a question, always ask 'Do you want more info?' If the user says yes, provide more details and ask again. If the user says no, go back to asking 'How can I help?'"
+        },
+        {
+            "role": "assistant",
+            "content": "Hey, how can I help you today?"
         }
     ]
 
