@@ -34,8 +34,6 @@ if 'messages' not in st.session_state:
     ]
 
 def maintain_buffer(messages, max_user_messages=2):
-    """Keep the system prompt and only the last N user messages and their corresponding assistant responses."""
-    # Find and preserve the system message
     system_message = None
     non_system_messages = []
     
@@ -48,30 +46,29 @@ def maintain_buffer(messages, max_user_messages=2):
     if len(non_system_messages) <= 1:
         return messages
     
-    # Find all user messages and their indices in non-system messages
+    # Find user messages and indices
     user_indices = [i for i, msg in enumerate(non_system_messages) if msg["role"] == "user"]
     
     if len(user_indices) <= max_user_messages:
         return messages
     
-    # Keep only the last max_user_messages user messages
+    # Keep only last user message
     indices_to_keep = set(user_indices[-max_user_messages:])
     
-    # For each user message to keep, also keep the assistant response that follows
+    # Keep the assistant response that follows
     for idx in list(indices_to_keep):
         if idx + 1 < len(non_system_messages) and non_system_messages[idx + 1]["role"] == "assistant":
             indices_to_keep.add(idx + 1)
     
-    # Rebuild the messages list
+    # Rebuild messages list
     filtered = [non_system_messages[i] for i in range(len(non_system_messages)) if i in indices_to_keep]
     
-    # Prepend system message if it exists
+    # Prepend system message
     if system_message:
         return [system_message] + filtered
     return filtered
 
 for msg in st.session_state.messages:
-    # Don't display system messages
     if msg["role"] == "system":
         continue
     chat_role = st.chat_message(msg["role"])
@@ -92,9 +89,9 @@ if prompt := st.chat_input("What's up?"):
 
     st.session_state.messages.append({"role": "assistant", "content": response})
     
-    # Maintain buffer: keep only the last 2 user messages and their responses, and preserve system prompt
+    # Maintain buffer
     st.session_state.messages = maintain_buffer(st.session_state.messages)
     
-    # Rerun to show the latest response
+    # Show latest response
     st.rerun()
 
