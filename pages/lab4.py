@@ -1,7 +1,12 @@
 import streamlit as st
 
 from openai import OpenAI
-from anthropic import Anthropic
+try:
+    from anthropic import Anthropic
+    anthropic_available = True
+except Exception:
+    Anthropic = None
+    anthropic_available = False
 import requests
 from bs4 import BeautifulSoup
 import glob
@@ -84,12 +89,19 @@ if not openai_api_key:
     st.error("Missing API_KEY in Streamlit secrets. Add it to .streamlit/secrets.toml.")
     st.stop()
 
-if not claude_api_key:
-    st.error("Missing CLAUDE_API_KEY in Streamlit secrets. Add it to .streamlit/secrets.toml.")
-    st.stop()
-
 openai_client = OpenAI(api_key=openai_api_key)
-anthropic_client = Anthropic(api_key=claude_api_key)
+
+# Initialize Anthropic client only if package and key are available
+anthropic_client = None
+if claude_api_key and anthropic_available:
+    try:
+        anthropic_client = Anthropic(api_key=claude_api_key)
+    except Exception:
+        anthropic_client = None
+elif claude_api_key and not anthropic_available:
+    st.sidebar.warning("Anthropic SDK not installed; Claude option will be disabled.")
+elif not claude_api_key and anthropic_available:
+    st.sidebar.warning("CLAUDE_API_KEY missing from secrets; Claude option will be disabled.")
 
 
 def extract_text_from_pdf(path):
