@@ -3,3 +3,6 @@ openai
 chromadb
 PyPDF2
 pysqlite3-binary
+requests
+beautifulsoup4
+anthropic
