@@ -7,4 +7,3 @@ requests
 beautifulsoup4
 anthropic
 requests-html
-json
