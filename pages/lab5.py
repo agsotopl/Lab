@@ -6,7 +6,7 @@ import json
 st.title("Lab 5: The What to Wear Bot")
 
 st.markdown("""
-
+    Tell us a city you're in, interested in going to, or just curious about, and it'll tell you what to wear based on the current weather. 
 """)
 
 # Get API keys from streamlit secrets
@@ -78,13 +78,13 @@ tools = [
 if location:
     if st.button("Get Advice"):
         try:
-            user_message = f"What should I wear today in {location}? Also suggest outdoor activities appropriate for the weather."
+            user_message = f"What should I wear today in {location}?"
 
             # First call: let the model invoke the weather tool
             first_response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "You are a helpful fashion and outdoor-activity advisor."},
+                    {"role": "system", "content": "You are a helpful fashion advisor."},
                     {"role": "user", "content": user_message}
                 ],
                 tools=tools,
@@ -117,7 +117,7 @@ if location:
                 second_response = client.chat.completions.create(
                     model="gpt-4o-mini",
                     messages=[
-                        {"role": "system", "content": "You are a helpful fashion and outdoor-activity advisor."},
+                        {"role": "system", "content": "You are a helpful fashion advisor."},
                         {"role": "user", "content": user_message},
                         response_message,
                         {"role": "tool", "tool_call_id": tool_call.id, "content": weather_summary},
