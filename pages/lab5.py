@@ -1,23 +1,25 @@
+from openai import OpenAI
 import requests
 import streamlit as st
+import json
 
-st.title("Lab 5: OpenWeatherMap API")
+st.title("Lab 5: The What to Wear Bot")
 
 st.markdown("""
 
 """)
 
-# Get API key from streamlit secrets
+# Get API keys from streamlit secrets
 api_key = st.secrets["OPENWEATHERMAP_API_KEY"]
 openai_api_key = st.secrets["API_KEY"]
 
-with st.sidebar:
-    st.header("Location")
-    location = st.text_input(
-        "Enter a city",
-        placeholder="e.g. Syracuse, NY, US",
-        value="Syracuse, NY, US"
-    )
+client = OpenAI(api_key=openai_api_key)
+
+location = st.text_input(
+    "Enter a city",
+    placeholder="e.g. Syracuse, NY, US",
+    value="Syracuse, NY, US"
+)
 
 
 # Define a function to fetch weather data
@@ -50,9 +52,79 @@ def get_current_weather(location: str, units: str = "imperial") -> dict:
         "wind_speed":  round(data["wind"]["speed"], 2),
     }
 
+
+# Define the tool for OpenAI
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_current_weather",
+            "description": "Get the current weather for a given city.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "location": {
+                        "type": "string",
+                        "description": "City name in the format 'City, State, Country' e.g. 'Syracuse, NY, US'. Default to 'Syracuse, NY, US' if no location is provided."
+                    }
+                },
+                "required": ["location"]
+            }
+        }
+    }
+]
+
+
 if location:
-    try:
-        weather = get_current_weather(location)
-        st.write(weather)
-    except Exception as e:
-        st.error(f"Error: {e}")
+    if st.button("Get Advice"):
+        try:
+            user_message = f"What should I wear today in {location}? Also suggest outdoor activities appropriate for the weather."
+
+            # First call: let the model invoke the weather tool
+            first_response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You are a helpful fashion and outdoor-activity advisor."},
+                    {"role": "user", "content": user_message}
+                ],
+                tools=tools,
+                tool_choice="auto"
+            )
+
+            response_message = first_response.choices[0].message
+
+            # Handle the tool call
+            if response_message.tool_calls:
+                tool_call = response_message.tool_calls[0]
+                args = json.loads(tool_call.function.arguments)
+                loc = args.get("location", "Syracuse, NY, US")
+
+                # Call the actual weather function
+                weather = get_current_weather(loc)
+
+                weather_summary = (
+                    f"Location: {weather['location']}, "
+                    f"Temperature: {weather['temperature']}°F, "
+                    f"Feels like: {weather['feels_like']}°F, "
+                    f"High: {weather['temp_max']}°F, "
+                    f"Low: {weather['temp_min']}°F, "
+                    f"Conditions: {weather['description']}, "
+                    f"Humidity: {weather['humidity']}%, "
+                    f"Wind: {weather['wind_speed']} mph"
+                )
+
+                # Second call: pass weather data back and get advice
+                second_response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful fashion and outdoor-activity advisor."},
+                        {"role": "user", "content": user_message},
+                        response_message,
+                        {"role": "tool", "tool_call_id": tool_call.id, "content": weather_summary},
+                    ]
+                )
+
+                st.write(second_response.choices[0].message.content)
+
+        except Exception as e:
+            st.error(f"Error: {e}")
