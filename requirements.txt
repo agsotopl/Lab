@@ -6,5 +6,5 @@ pysqlite3-binary
 requests
 beautifulsoup4
 anthropic
-requests
+requests-html
 json
