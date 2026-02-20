@@ -3,7 +3,7 @@ import requests
 import streamlit as st
 import json
 
-st.title("Lab 5: The What to Wear Bot")
+st.title("Lab 5: Clothing Recommendation Based on Weather")
 
 st.markdown("""
     Tell us a city you're in, interested in going to, or just curious about, and it'll tell you what to wear based on the current weather. 
